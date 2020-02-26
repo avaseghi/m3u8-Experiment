@@ -28,23 +28,22 @@ var writer = m3u.httpLiveStreamingWriter();
 var index = 0;
 var isFirstVid = true;
 
+// EXT-X-VERSION: Indicates the compatibility version of the Playlist file.
+// (optional)
+writer.version(6);
+
+// EXT-X-PLAYLIST-TYPE: Provides mutability information about the m3u file.
+// (optional)
+writer.playlistType('EVENT');
+
+// EXT-X-TARGETDURATION: Maximum media file duration.
+writer.targetDuration(6);
+
+// EXT-X-MEDIA-SEQUENCE: Sequence number of first file (optional).
+// (optional)
+writer.mediaSequence(0);
+
 app.get('/playlist.m3u8', function (req, res) {
-  // EXT-X-VERSION: Indicates the compatibility version of the Playlist file.
-  // (optional)
-  writer.version(6);
-
-  writer.allowCache(false);
-
-  // EXT-X-PLAYLIST-TYPE: Provides mutability information about the m3u file.
-  // (optional)
-  writer.playlistType('EVENT');
-
-  // EXT-X-TARGETDURATION: Maximum media file duration.
-  writer.targetDuration(6);
-
-  // EXT-X-MEDIA-SEQUENCE: Sequence number of first file (optional).
-  // (optional)
-  writer.mediaSequence(0);
 
   makePlaylist(req);
 
@@ -100,15 +99,17 @@ function makePlaylist(req) {
 
       for (i = 0; i < 3; i++) {
         writer.file(req.protocol + '://' + req.get('host') + "/" + default_playlist[index][i].name, default_playlist[index][i].duration);
-        console.log("Adding " + default_playlist[index][i].name);
+        // console.log("Adding " + default_playlist[index][i].name);
         vidDuration += default_playlist[index][i].duration;
       }
 
       setTimeout(function() {
         for (i = 3; i < default_playlist[index].length; i++) {
           writer.file(req.protocol + '://' + req.get('host') + "/" + default_playlist[index][i].name, default_playlist[index][i].duration);
-          console.log("Adding " + default_playlist[index][i].name);
-          vidDuration += default_playlist[index][i].duration;
+          // console.log("Adding " + default_playlist[index][i].name);
+          if (i < default_playlist[index].length - 3) {
+            vidDuration += default_playlist[index][i].duration;
+          }
         }
 
         if (index < default_playlist.length - 1) {
@@ -117,17 +118,17 @@ function makePlaylist(req) {
           index = 0;
         }
 
+        console.log("----------------------------------");
+        console.log(writer.toString());
+
         isFirstVid = false;
 
-        var nextVidCall = (vidDuration.toFixed() * 1000) * .75
-        console.log("This video is " + vidDuration.toFixed() + " seconds long. Will make the next call in " + (vidDuration.toFixed()* .75) + " seconds.");
+        var nextVidCall = Math.floor(vidDuration) * 1000
+        console.log("Will make the next call in approximately " + Math.floor(vidDuration) + " seconds.");
 
         setTimeout(function() {
-          console.log((vidDuration.toFixed()* .75) + " seconds have passed. Will add next vid now.");
           timeToAdd = true;
         }, nextVidCall);
-
-        console.log("----------------------------------");
 
       }, 3000);
 
@@ -147,7 +148,7 @@ function makePlaylist(req) {
 
       for (i = 0; i < default_playlist[index].length; i++) {
         writer.file(req.protocol + '://' + req.get('host') + "/" + default_playlist[index][i].name, default_playlist[index][i].duration);
-        console.log("Adding " + default_playlist[index][i].name);
+        // console.log("Adding " + default_playlist[index][i].name);
         vidDuration += default_playlist[index][i].duration;
       }
 
@@ -157,17 +158,17 @@ function makePlaylist(req) {
         index = 0;
       }
 
+      console.log("----------------------------------");
+      console.log(writer.toString());
+
       timeToAdd = false;
 
-      var nextVidCall = (vidDuration.toFixed() * 1000) * .75;
-      console.log("This video is " + vidDuration.toFixed() + " seconds long. Will the make next call in " + (vidDuration.toFixed() * .75) + " seconds.");
+      var nextVidCall = Math.floor(vidDuration) * 1000;
+      console.log("Will make next call in approximately " + Math.floor(vidDuration) + " seconds.");
 
       setTimeout(function() {
-        console.log((vidDuration.toFixed() * .75) + " seconds have passed. Will add next vid now.");
         timeToAdd = true;
       }, nextVidCall);
-
-      console.log("----------------------------------");
     }
   }
 }

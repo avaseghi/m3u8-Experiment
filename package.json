@@ -9,7 +9,7 @@
   "author": "Dominic Bou-Samra <dominic.bou.samra@gmail.com>",
   "license": "ISC",
   "dependencies": {
-    "express": "^4.17.1",
+    "express": "^4.18.2",
     "lodash": "^4.17.15",
     "m3u": "0.0.2",
     "moment": "^2.24.0"
